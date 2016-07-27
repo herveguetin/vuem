@@ -105,4 +105,6 @@ let vuem = {};
 vuem.registerModule = registerModule;
 
 export default vuem;
+export {Vue};
+export {Vuex};
 
