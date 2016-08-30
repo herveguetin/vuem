@@ -10,33 +10,21 @@ Vuem stands for "Vue Modules".
 
 # How to use
 
-### Register your module with Vuem
+### Register your modules with Vuem
 
-All you have to do is register your module with Vuem.
+All you have to do is register your modules with Vuem.
 A good idea is to have a `_register.js` file doing the job:
 
 ```
-import Vuem from "vuem";
 import store from "./store";
-import firstComponent from "./components/first-component";
-import secondComponent from "./components/second-component";
+import firstComponent from "./first-component";
+import secondComponent from "./second-component";
 
-// Let's tell Vuem that we have a module!
-Vuem.registerModule(
-    // The module name
-    'demo',
-    {
-        // An array of all Vue.js components from this module
-        components: [
-            firstComponent,
-            secondComponent
-        ],
-
-        // The store (app state) for this module.
-        // Please note that this store will be populated as a Vuex module whose name/id is the name of the Vuem module ("demo" in this example)
-        store
-    }
-);
+export default {
+    name: 'demo',
+    components: [firstComponent, secondComponent],
+    store
+}
 ```
 
 You can then have the following folder structure:
@@ -51,6 +39,19 @@ js_source
 |   |-- actions.js
 |   `-- store.js
 `-- other_module...
+```
+
+Then, in your main app JS file:
+
+```
+import Vuem from "vuem";
+import demo from "./demo/_register";
+// import other_module from "./other_module/_register";
+
+Vuem.run([
+    demo
+    //, other_module
+]);
 ```
 
 ### Caution about your "store.js" files
@@ -77,22 +78,5 @@ const mutations = {
 export default {
     state,
     mutations
-}
-```
-
-### With Webpack
-
-You now just have to tell Webpack to use your `_register.js` files as entry points!
-Like so in your `webpack.config.js`:
-```
-var glob = require("glob")
-module.exports = {
-
-    ...
-    
-    entry: glob.sync('your/path/to/sources/**/_register.js'),
-    
-    ... 
-    
 }
 ```
