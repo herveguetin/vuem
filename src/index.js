@@ -23,8 +23,8 @@
  *
  */
 
-import Vue from "vue";
-import Vuex from "vuex";
+import Vue from "vue"
+import Vuex from "vuex"
 
 // Make vue aware of vuex
 Vue.use(Vuex)
@@ -33,76 +33,96 @@ Vue.config.debug = true
 // Are we in debug mode?
 const debug = process.env.NODE_ENV !== 'production'
 
-// vuem modules
-let modules = {}
-
-// Components are components declared in vuem modules
-let components = []
-
-// vueComponents are VueJS components used in the vuem instance
-let vueComponents = []
-
-// Stores are Vuex main store components declared in vuem modules
-let stores = {}
+// Vuem modules
+let vuemModules
 
 // vuexStore is the main Vuex store aggregating 'stores' vuem modules
-let vuexStore = {}
+let vuexStore
 
 /**
- * Let's init vuem with existing modules stores and components
+ * Check if we can run the app
+ *
+ * @returns {boolean}
  */
-function init() {
+function canRun() {
+    let errors = []
 
-    // Init Vuex Store
-    vuexStore = {}
-    vuexStore = new Vuex.Store({
-        modules: stores,
-        strict: debug,
+    // Module names check
+    let moduleNames = {}
+    vuemModules.map(function (module) {
+        if (moduleNames[module.name]) {
+            errors.push('[vuem] Module named "' + module.name + '" already exists.')
+        }
+        moduleNames[module.name] = module.name
     })
 
-    // Init VueJS components
-    vueComponents = []
-    components.map(function (component) {
-        vueComponents.push(new Vue({...component, store: vuexStore}))
-    });
+    // Manage return statement
+    if (errors.length) {
+        errors.map(function (error) {
+            console.error(error)
+        })
+
+        return false
+    }
+
+    return true
 }
 
 /**
- * Add a new module to vuem
- *
- * @param module
+ * Build Vuex store
  */
-function registerModule(name, module) {
-    
-    // Check that a module with the same name does not exist
-    if (modules[name]) {
-        throw new Error('module with name ' + name + ' already exists')
-    }
-    modules[name] = module;
+function makeVuexStore() {
 
-    // Populate vuem stores with module store
-    if (module.store) {
-        Object.assign(stores, {[name]: module.store})
-    }
+    // Create a vuexModules object that contains all Vuem stores
+    let vuexModules = {}
 
-    // Populate vuem components with module components
-    if (module.components) {
-        module.components.map(function (component) {
-            components.push(component)
-        })
-    }
+    vuemModules.map(function (module) {
+        if (module.store) {
+            Object.assign(vuexModules, {[module.name]: module.store})
+        }
+    })
 
-    // (re)init vuem in order to make all modules work nicely together
-    init()
+    // Make the actual Vuex store
+    vuexStore = new Vuex.Store({
+        modules: vuexModules,
+        strict: debug,
+    })
+}
+
+/**
+ * Create all Vue instances based on Vuem components
+ */
+function makeVueInstances() {
+    vuemModules.map(function (module) {
+        if (module.components) {
+            module.components.map(function (component) {
+                new Vue({...component, store: vuexStore})
+            })
+        }
+    })
+}
+
+/**
+ * Launch Vuem with passed Vuem modules
+ *
+ * @param {Array} modules
+ */
+function run(modules) {
+
+    vuemModules = modules
+
+    if (canRun()) {
+        makeVuexStore()
+        makeVueInstances()
+    }
 }
 
 /**
  * Expose vuem
  */
-let vuem = {};
+let vuem = {
+    run: run
+}
 
-// Module registration
-vuem.registerModule = registerModule;
-
-export default vuem;
+export default vuem
 

@@ -1,6 +1,6 @@
 {
   "name": "vuem",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A modular way to do Flux and reactive with VueJS and Vuex",
   "main": "./dist/index.js",
   "author": "Hervé Guétin <@herveguetin>",
