@@ -125,4 +125,6 @@ let vuem = {
 }
 
 export default vuem
+export {Vue}
+export {Vuex}
 
