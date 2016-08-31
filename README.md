@@ -48,7 +48,7 @@ import Vuem from "vuem";
 import demo from "./demo/_register";
 // import other_module from "./other_module/_register";
 
-Vuem.run([
+Vuem.use([
     demo
     //, other_module
 ]);

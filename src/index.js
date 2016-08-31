@@ -33,6 +33,9 @@ Vue.config.debug = true
 // Are we in debug mode?
 const debug = process.env.NODE_ENV !== 'production'
 
+// Is Vuem loaded?
+let isLoaded = false;
+
 // Vuem modules
 let vuemModules
 
@@ -40,18 +43,24 @@ let vuemModules
 let vuexStore
 
 /**
- * Check if we can run the app
+ * Check if we can use the app
  *
  * @returns {boolean}
  */
 function canRun() {
     let errors = []
 
+    // Check if Vuem is already launched
+    if (isLoaded) {
+        errors.push('Vuem is already loaded. Please call Vuem.use() only once by passing an Array of modules as argument.')
+    }
+    isLoaded = true;
+
     // Module names check
     let moduleNames = {}
     vuemModules.map(function (module) {
         if (moduleNames[module.name]) {
-            errors.push('[vuem] Module named "' + module.name + '" already exists.')
+            errors.push('Module named "' + module.name + '" already exists.')
         }
         moduleNames[module.name] = module.name
     })
@@ -59,7 +68,7 @@ function canRun() {
     // Manage return statement
     if (errors.length) {
         errors.map(function (error) {
-            console.error(error)
+            console.error('[vuem] ' + error)
         })
 
         return false
@@ -107,7 +116,7 @@ function makeVueInstances() {
  *
  * @param {Array} modules
  */
-function run(modules) {
+function use(modules) {
 
     vuemModules = modules
 
@@ -121,7 +130,7 @@ function run(modules) {
  * Expose vuem
  */
 let vuem = {
-    run: run
+    use: use
 }
 
 export default vuem
